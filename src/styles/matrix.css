@@ -1,0 +1,11 @@
+/* By Boujjou Achraf*/
+
+/*basic reset */
+            
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body {background: rgb(22, 22, 22);}
+canvas {display:block;}

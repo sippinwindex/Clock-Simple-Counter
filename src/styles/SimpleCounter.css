@@ -1,0 +1,418 @@
+/* SimpleCounter.css */
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
+:root {
+  /* Colors */
+  --background-dark: #121212; /* Fallback or secondary bg */
+  --counter-bg: #1a1a1a; /* Inner counter background */
+  --casing-bg: #111; /* Outer casing background */
+  --digit-bg: #0a0a0a;
+  --glow-color: #00ff7f; /* *** CLOCK DIGITS *** - Stays Green */
+  --glow-color-medium: #00cc66;
+  --glow-color-darker: #008a45;
+  --text-color: #e0e0e0; /* Default text color */
+  --button-bg: #282828;
+  --button-border: var(--glow-color-darker);
+  --button-hover-bg: #333;
+  --button-active-bg: #1f1f1f;
+  --separator-color: var(--glow-color); /* Separator base color */
+  --separator-rgb: 0, 255, 127; /* Updated RGB for brighter separator */
+  --glass-border-color: rgba(220, 255, 230, 0.15); /* Faintly green-white */
+  --magenta-label-color: #E42273; /* *** INPUT LABELS *** - Magenta */
+  --magenta-label-rgb: 228, 34, 115; /* Optional RGB for shadows */
+
+  /* Responsive Sizes using clamp(min, preferred, max) - ADJUSTED MINIMUMS */
+  /* Overall width */
+  --counter-width: clamp(300px, 95vw, 900px); /* Reduced min width slightly */
+  /* Digit related sizes */
+  --digit-font-size: clamp(35px, 11vmin, 100px); /* Reduced min font size */
+  --digit-wrapper-height: clamp(65px, 16vmin, 120px); /* Reduced min height */
+  --digit-wrapper-min-width: clamp(38px, 12vmin, 80px); /* Significantly reduced min width */
+  /* Icon */
+  --icon-size: clamp(35px, 9vmin, 70px); /* Reduced min icon size */
+  /* Separator */
+  --separator-width: clamp(2px, 0.8vmin, 6px); /* Reduced min separator width */
+  /* Buttons */
+  --button-font-size: clamp(12px, 2.5vmin, 16px);
+  --button-padding: clamp(8px 15px, 2vmin 3vmin, 12px 25px);
+  /* Layout Spacing */
+  --casing-padding: clamp(6px, 1.8vmin, 15px); /* Reduced min casing padding */
+  --display-internal-padding-y: clamp(6px, 1.8vmin, 12px); /* Reduced min internal Y padding */
+  --display-internal-padding-x: clamp(8px, 2.5vw, 20px); /* Reduced min internal X padding */
+  --display-gap: clamp(3px, 1.2vw, 10px); /* Reduced min display gap */
+  --icon-margin-right: clamp(4px, 1.5vw, 15px); /* Reduced min icon margin */
+  --app-gap: clamp(20px, 5vmin, 40px);
+}
+
+/* --- Keyframes --- */
+
+/* Digit change animation */
+@keyframes digitFlip {
+  0% { transform: rotateX(0deg) scale(1); opacity: 1; }
+  50% { transform: rotateX(90deg) scale(0.9); opacity: 0.5; }
+  100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+}
+
+/* Constant pulsing glow for digits */
+@keyframes pulseGlow {
+    0%, 100% { text-shadow: 0 0 15px var(--glow-color), 0 0 25px var(--glow-color), 0 0 5px #fff; }
+    50% { text-shadow: 0 0 20px var(--glow-color), 0 0 35px var(--glow-color), 0 0 8px #fff; }
+}
+
+/* Moving gradient border animation */
+@keyframes animatedGradientBorder {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Subtle electrical flicker animation */
+@keyframes electricalFlicker {
+    0%, 94% { opacity: 1; filter: blur(3px) brightness(1); }
+    95% { opacity: 0.85; filter: blur(3px) brightness(1.1); }
+    96% { opacity: 1; filter: blur(3px) brightness(1); }
+    97.5% { opacity: 0.9; filter: blur(2px) brightness(0.95); }
+    98.5%, 100% { opacity: 1; filter: blur(3px) brightness(1); }
+}
+
+
+/* --- Global Styles --- */
+/* Basic reset is now in <style> tag in index.html for canvas */
+body {
+    /* Background is handled by canvas in index.html */
+    color: var(--text-color);
+    font-family: 'Audiowide', cursive;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    min-height: 100vh;
+    /* padding: 20px; /* Moved padding to .app-container */
+}
+
+/* --- Layout Container --- */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--app-gap); /* Responsive gap */
+    width: 100%; /* Take full width to help center content */
+    max-width: var(--counter-width); /* Limit max width */
+    /* Ensure content is above the canvas */
+    position: relative;
+    z-index: 1;
+    padding: 20px; /* Add padding here instead of body */
+    box-sizing: border-box;
+}
+
+/* --- Counter Casing --- */
+.counter-casing {
+    background: var(--casing-bg);
+    padding: var(--casing-padding); /* Use variable */
+    border-radius: 45px 45px 30px 30px; /* Should match glow radius calculation */
+    border: 2px solid rgba(245, 255, 47, 0.633); /* Subtle outer plastic/glass edge */
+    box-shadow:
+      0 8px 25px rgba(0, 0, 0, 0.6), /* Outer shadow for depth */
+      inset 0 1px 1px rgba(255, 255, 255, 0.06), /* Inner top highlight */
+      inset 0 -1px 1px rgba(0, 0, 0, 0.3); /* Inner bottom shadow */
+    position: relative;
+    width: 100%; /* Fill the app-container width */
+    box-sizing: border-box; /* Include padding/border in width */
+}
+
+/* --- Counter Display Shell (Inner part) --- */
+.counter-display {
+    display: flex;
+    align-items: stretch; /* Important for vertical separators */
+    justify-content: space-between; /* Distribute space */
+    gap: var(--display-gap); /* Use variable */
+    padding: var(--display-internal-padding-y) var(--display-internal-padding-x); /* Use variable */
+    background: linear-gradient(145deg, #222, #111);
+    border-radius: 30px 30px 15px 15px; /* Clock shape */
+    border: 4px solid var(--glow-color-darker);
+    box-shadow:
+      inset 0 2px 8px rgba(0, 0, 0, 0.8),
+      inset 0 -2px 5px rgba(0, 0, 0, 0.5);
+    min-height: calc(var(--digit-wrapper-height) + 20px); /* Adjust based on digit height */
+    position: relative;
+    z-index: 0; /* Base for internal stacking */
+    overflow: hidden; /* Hide internal overflow; ::before glow is outside */
+}
+
+/* Inner Animated Glow with Flicker */
+.counter-display::before {
+    content: '';
+    position: absolute;
+    inset: -5px; /* Glow distance from border */
+    border-radius: 35px 35px 20px 20px; /* (parent radius + abs(inset)) */
+    padding: 2px; /* Glow thickness */
+    background: linear-gradient(60deg, var(--glow-color), yellow, var(--glow-color-medium), var(--glow-color));
+    background-size: 300% 300%;
+    z-index: -1; /* Behind main counter display */
+    filter: blur(3px); /* Base blur */
+    /* Apply BOTH animations */
+    animation:
+        animatedGradientBorder 5s linear infinite,
+        electricalFlicker 7s linear infinite;
+    opacity: 1; /* Start visible */
+}
+
+/* Clock Icon */
+.clock-image {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    margin-right: var(--icon-margin-right);
+    color: var(--glow-color);
+    filter: drop-shadow(0 0 8px var(--glow-color));
+    flex-shrink: 0; /* Prevent shrinking */
+    align-self: center; /* Center icon vertically */
+}
+.clock-icon {
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Digit Display Elements --- */
+
+/* Vertical Separator Line Styles (Sharpened & Responsive) */
+.vertical-separator {
+    width: var(--separator-width); /* Use variable */
+    background: linear-gradient(
+        to bottom,
+        rgba(var(--separator-rgb), 0.5), /* Use new brighter RGB */
+        rgba(var(--separator-rgb), 1.0), /* Fully bright middle */
+        rgba(var(--separator-rgb), 0.5)
+    );
+    box-shadow: 0 0 4px 1px rgba(var(--separator-rgb), 0.8); /* Sharper shadow */
+    margin: 3px 0; /* Adjust vertical margin slightly */
+    border-radius: 2px;
+    border-left: 1px solid rgba(0,0,0,0.4); /* Edge definition */
+    border-right: 1px solid rgba(0,0,0,0.4); /* Edge definition */
+    z-index: 2; /* Above digit background */
+    position: relative; /* Needed for z-index */
+    flex-shrink: 0; /* Prevent separator from shrinking */
+    /* Stretches via align-items: stretch on parent */
+}
+
+/* Wrapper for individual digits (Responsive) */
+.digit-wrapper {
+    background-color: var(--digit-bg);
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid #222;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+    min-width: var(--digit-wrapper-min-width); /* Use variable */
+    height: var(--digit-wrapper-height); /* Use variable */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    perspective: 300px;
+    position: relative; /* For pseudo-element */
+    z-index: 1; /* Above main background glow, below separator */
+    align-self: center; /* Center box vertically */
+    /* flex-grow: 1; /* REMOVED flex-grow to prevent unwanted expansion */
+    flex-basis: 0; /* Still useful for initial distribution */
+    flex-shrink: 1; /* Allow shrinking if necessary */
+}
+
+/* Glass Frame Pseudo-element around digit wrapper */
+.digit-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 12px; /* Outer frame rounding */
+    border: 2px solid var(--glass-border-color);
+    box-shadow:
+        inset 0 0 4px rgba(0, 0, 0, 0.4), /* Inner shadow */
+        inset 0 1px 1px rgba(255, 255, 255, 0.08), /* Inner top highlight */
+        0px 1px 0px rgba(255, 255, 255, 0.05); /* Subtle outer top highlight */
+    z-index: 1; /* Above digit wrapper bg, below separator */
+}
+
+/* Individual digit text styles (Responsive & GREEN) */
+.seconds {
+    font-family: 'Audiowide', cursive;
+    font-size: var(--digit-font-size); /* Use variable */
+    color: var(--glow-color); /* Stays Green */
+    line-height: 1;
+    letter-spacing: 1px;
+    text-align: center;
+    position: relative; /* Needed for z-index */
+    z-index: 3; /* Above glass frame & separator */
+    user-select: none; /* Prevent text selection */
+    animation: pulseGlow 2s infinite ease-in-out; /* Constant pulse */
+    white-space: nowrap; /* Prevent wrapping if font gets too large */
+}
+
+/* Digit change animation trigger */
+.seconds.digit-change {
+   /* Apply flip animation + maintain pulse */
+   animation: digitFlip 0.3s ease-in-out, pulseGlow 2s infinite ease-in-out;
+}
+
+/* --- Controls & Inputs --- */
+
+.controls-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%; /* Use full width within app-container */
+}
+
+.input-group {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 10px 15px; /* Row and column gap */
+    align-items: center;
+    justify-content: center;
+    background-color: var(--casing-bg); /* Use solid dark background */
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--button-border);
+    width: fit-content; /* Fit content but allow wrapping */
+    max-width: 100%; /* Don't overflow container */
+    box-sizing: border-box;
+}
+
+/* Labels are Magenta */
+.input-group label {
+    font-size: clamp(11px, 2.2vmin, 14px); /* Responsive label */
+    color: var(--magenta-label-color); /* Use magenta variable */
+    text-shadow: 0 0 5px rgba(var(--magenta-label-rgb), 0.5); /* Optional shadow */
+    flex-shrink: 0;
+    margin-right: 5px;
+}
+
+/* Input fields */
+.input-group input[type="number"] {
+    font-family: 'Audiowide', cursive;
+    font-size: clamp(12px, 2.5vmin, 16px); /* Responsive input text */
+    background-color: var(--digit-bg); /* Keep input field background very dark */
+    color: var(--glow-color); /* Input text stays Green */
+    border: 1px solid var(--glow-color-darker);
+    border-radius: 5px;
+    padding: 6px 8px;
+    width: clamp(60px, 15vmin, 80px); /* Responsive width */
+    text-align: center;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    appearance: textfield; /* Hide default number spinners */
+    -moz-appearance: textfield; /* Firefox */
+}
+/* Hide spinner buttons */
+.input-group input[type=number]::-webkit-inner-spin-button,
+.input-group input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-group input[type="number"]:focus {
+    border-color: var(--glow-color);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 5px var(--glow-color);
+}
+.input-group input[type="number"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Action Buttons --- */
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap */
+    justify-content: center; /* Center wrapped buttons */
+    gap: 15px;
+}
+
+/* Base Button Style */
+.control-button {
+    font-family: 'Audiowide', cursive;
+    font-size: var(--button-font-size); /* Responsive font size */
+    padding: var(--button-padding); /* Responsive padding */
+    background-color: var(--button-bg);
+    color: var(--glow-color); /* Default button text is green */
+    border: 2px solid var(--button-border);
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    white-space: nowrap; /* Prevent text wrapping */
+    flex-grow: 0; /* Prevent excessive growth */
+    flex-shrink: 0;
+}
+
+/* Button Hover State */
+.control-button:hover:not(:disabled) {
+    background-color: var(--button-hover-bg);
+    color: #fff; /* Text turns white on hover */
+    /* Default hover shadow */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px var(--glow-color-medium);
+}
+
+/* Button Active (Pressed) State */
+.control-button:active:not(:disabled) {
+    background-color: var(--button-active-bg);
+    transform: scale(0.96); /* Press down effect */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 0 5px var(--glow-color);
+}
+
+/* Button Disabled State */
+.control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Specific Button Styling */
+.setup-button {
+    border-color: var(--glow-color-medium);
+    color: var(--glow-color-medium); /* Text is medium green */
+}
+.setup-button:hover:not(:disabled) {
+    /* Text turns white (from general hover rule) */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px var(--glow-color-medium);
+}
+
+.start-button {
+    /* Uses base green color (var(--glow-color)) for text */
+    /* border-color: var(--glow-color); */
+}
+/* Hover/Active use general rules (text becomes white) */
+
+.stop-button {
+    border-color: #b33; /* Reddish */
+    color: #f88; /* Text is reddish */
+}
+.stop-button:hover:not(:disabled) {
+    background-color: #402020; /* Dark red hover */
+    color: #fff; /* Text turns white */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px #f88; /* Red glow */
+}
+
+.reset-button {
+     border-color: #36a; /* Bluish */
+     color: #8cf; /* Text is bluish */
+}
+.reset-button:hover:not(:disabled) {
+    background-color: #203040; /* Dark blue hover */
+    color: #fff; /* Text turns white */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px #8cf; /* Blue glow */
+}
+
+/* --- Font test styling (Optional) --- */
+.font-test {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: var(--glow-color); /* Stays green */
+    font-family: 'Audiowide', cursive;
+    font-size: 12px; /* Keep small */
+    opacity: 0.3; /* Very subtle */
+    z-index: -1; /* Ensure it's behind everything */
+    pointer-events: none; /* Non-interactive */
+}

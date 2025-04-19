@@ -1,13 +1,95 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <link rel="icon" type="image/svg+xml" href="/4geeks.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Rigo with Vanilla.js</title>
+    <title>Retro Digital Counter</title>
+    <!-- Link the MAIN CSS file that contains ALL styles -->
+    <link rel="stylesheet" href="/src/styles/SimpleCounter.css">
+    <!-- Basic Matrix CSS (can be combined in SimpleCounter.css too) -->
+    <style>
+        /* Minimal reset - consider a more robust one if needed */
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* Added box-sizing */
+        body { background: black; overflow-x: hidden;} /* Force black bg, hide horizontal scroll */
+        canvas#c { /* Target the canvas specifically */
+            display: block;
+            position: fixed; /* Position behind everything */
+            top: 0;
+            left: 0;
+            z-index: -1; /* Send to back */
+            width: 100%;
+            height: 100%;
+         }
+    </style>
   </head>
   <body>
+    <!-- Canvas element for Matrix Rain -->
+    <canvas id="c"></canvas>
+
+    <!-- React App Root -->
     <div id="root"></div>
+
+    <!-- Main React Script -->
     <script type="module" src="/src/js/main.jsx"></script>
+
+    <!-- Matrix Rain Effect JavaScript -->
+    <script>
+        var c = document.getElementById("c");
+        var ctx = c.getContext("2d");
+
+        // Function to resize canvas and recalculate columns/drops
+        function resizeCanvas() {
+            c.height = window.innerHeight;
+            c.width = window.innerWidth;
+            columns = c.width / font_size;
+            drops = [];
+            for (var x = 0; x < columns; x++) {
+                drops[x] = 1;
+            }
+        }
+
+        // Initial setup
+        var matrix = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}".split("");
+        var font_size = 12; // Slightly larger font
+        var columns; // Declare columns
+        var drops = []; // Declare drops
+
+        // Initial resize
+        resizeCanvas();
+
+        // Handle window resize
+        window.addEventListener('resize', resizeCanvas);
+
+        // Drawing function
+        function draw() {
+            // Translucent black background to create the fading trail effect
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; // Adjusted alpha slightly
+            ctx.fillRect(0, 0, c.width, c.height);
+
+            ctx.fillStyle = "#0F0"; // Matrix green text
+            ctx.font = font_size + "px monospace"; // Use monospace font
+
+            // Looping over drops
+            for (var i = 0; i < drops.length; i++) {
+                // A random character to print
+                var text = matrix[Math.floor(Math.random() * matrix.length)];
+                // x = i * font_size, y = value of drops[i] * font_size
+                ctx.fillText(text, i * font_size, drops[i] * font_size);
+
+                // Sending the drop back to the top randomly
+                if (drops[i] * font_size > c.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                // Incrementing Y coordinate
+                drops[i]++;
+            }
+        }
+
+        // Set animation interval
+        setInterval(draw, 40); // Adjusted interval slightly
+
+    </script>
   </body>
 </html>
