@@ -7,7 +7,7 @@
   --counter-bg: #1a1a1a; /* Inner counter background */
   --casing-bg: #111; /* Outer casing background */
   --digit-bg: #0a0a0a;
-  --glow-color: #00ff7f; /* *** CLOCK DIGITS *** - Stays Green */
+  --glow-color: #00ff7f; /* *** CLOCK DIGITS *** - Green */
   --glow-color-medium: #00cc66;
   --glow-color-darker: #008a45;
   --text-color: #e0e0e0; /* Default text color */
@@ -16,31 +16,29 @@
   --button-hover-bg: #333;
   --button-active-bg: #1f1f1f;
   --separator-color: var(--glow-color); /* Separator base color */
-  --separator-rgb: 0, 255, 127; /* Updated RGB for brighter separator */
+  --separator-rgb: 0, 255, 127; /* RGB for brighter separator */
   --glass-border-color: rgba(220, 255, 230, 0.15); /* Faintly green-white */
   --magenta-label-color: #E42273; /* *** INPUT LABELS *** - Magenta */
   --magenta-label-rgb: 228, 34, 115; /* Optional RGB for shadows */
+  --direction-button-border: #999; /* Neutral border for mode button */
+  --direction-button-text: #bbb;  /* Neutral text for mode button */
+  --direction-button-hover-bg: #444;
+  --direction-button-hover-glow: #ccc;
 
-  /* Responsive Sizes using clamp(min, preferred, max) - ADJUSTED MINIMUMS */
-  /* Overall width */
-  --counter-width: clamp(300px, 95vw, 900px); /* Reduced min width slightly */
-  /* Digit related sizes */
-  --digit-font-size: clamp(35px, 11vmin, 100px); /* Reduced min font size */
-  --digit-wrapper-height: clamp(65px, 16vmin, 120px); /* Reduced min height */
-  --digit-wrapper-min-width: clamp(38px, 12vmin, 80px); /* Significantly reduced min width */
-  /* Icon */
-  --icon-size: clamp(35px, 9vmin, 70px); /* Reduced min icon size */
-  /* Separator */
-  --separator-width: clamp(2px, 0.8vmin, 6px); /* Reduced min separator width */
-  /* Buttons */
+  /* Responsive Sizes using clamp(min, preferred, max) - Adjusted Minimums */
+  --counter-width: clamp(300px, 95vw, 900px);
+  --digit-font-size: clamp(35px, 11vmin, 100px);
+  --digit-wrapper-height: clamp(65px, 16vmin, 120px);
+  --digit-wrapper-min-width: clamp(38px, 12vmin, 80px);
+  --icon-size: clamp(35px, 9vmin, 70px);
+  --separator-width: clamp(2px, 0.8vmin, 6px);
   --button-font-size: clamp(12px, 2.5vmin, 16px);
   --button-padding: clamp(8px 15px, 2vmin 3vmin, 12px 25px);
-  /* Layout Spacing */
-  --casing-padding: clamp(6px, 1.8vmin, 15px); /* Reduced min casing padding */
-  --display-internal-padding-y: clamp(6px, 1.8vmin, 12px); /* Reduced min internal Y padding */
-  --display-internal-padding-x: clamp(8px, 2.5vw, 20px); /* Reduced min internal X padding */
-  --display-gap: clamp(3px, 1.2vw, 10px); /* Reduced min display gap */
-  --icon-margin-right: clamp(4px, 1.5vw, 15px); /* Reduced min icon margin */
+  --casing-padding: clamp(6px, 1.8vmin, 15px);
+  --display-internal-padding-y: clamp(6px, 1.8vmin, 12px);
+  --display-internal-padding-x: clamp(8px, 2.5vw, 20px);
+  --display-gap: clamp(3px, 1.2vw, 10px);
+  --icon-margin-right: clamp(4px, 1.5vw, 15px);
   --app-gap: clamp(20px, 5vmin, 40px);
 }
 
@@ -87,7 +85,6 @@ body {
     justify-content: center; /* Center vertically */
     align-items: center; /* Center horizontally */
     min-height: 100vh;
-    /* padding: 20px; /* Moved padding to .app-container */
 }
 
 /* --- Layout Container --- */
@@ -110,7 +107,7 @@ body {
     background: var(--casing-bg);
     padding: var(--casing-padding); /* Use variable */
     border-radius: 45px 45px 30px 30px; /* Should match glow radius calculation */
-    border: 2px solid rgba(245, 255, 47, 0.633); /* Subtle outer plastic/glass edge */
+    border: 2px solid rgba(255, 255, 255, 0.08); /* Subtle outer plastic/glass edge */
     box-shadow:
       0 8px 25px rgba(0, 0, 0, 0.6), /* Outer shadow for depth */
       inset 0 1px 1px rgba(255, 255, 255, 0.06), /* Inner top highlight */
@@ -255,10 +252,13 @@ body {
 
 .controls-area {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* Arrange setup & mode side-by-side */
+    flex-wrap: wrap; /* Allow wrapping */
+    align-items: center; /* Align items vertically */
+    justify-content: center; /* Center horizontally */
     gap: 15px;
     width: 100%; /* Use full width within app-container */
+    margin-bottom: 15px; /* Space below control buttons */
 }
 
 .input-group {
@@ -274,6 +274,9 @@ body {
     width: fit-content; /* Fit content but allow wrapping */
     max-width: 100%; /* Don't overflow container */
     box-sizing: border-box;
+    /* Make it take full width if it was the only element */
+    flex-basis: 100%;
+    order: 3; /* Ensure input group appears below the buttons in flex row */
 }
 
 /* Labels are Magenta */
@@ -372,11 +375,25 @@ body {
 .setup-button {
     border-color: var(--glow-color-medium);
     color: var(--glow-color-medium); /* Text is medium green */
+    order: 1; /* Control button order in flex row */
 }
 .setup-button:hover:not(:disabled) {
     /* Text turns white (from general hover rule) */
     box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px var(--glow-color-medium);
 }
+
+/* Mode Direction Button (Added Style) */
+.direction-button {
+    border-color: var(--direction-button-border); /* Use variable */
+    color: var(--direction-button-text); /* Use variable */
+    order: 2; /* Control button order in flex row */
+}
+.direction-button:hover:not(:disabled) {
+    background-color: var(--direction-button-hover-bg); /* Use variable */
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px var(--direction-button-hover-glow); /* Use variable */
+}
+
 
 .start-button {
     /* Uses base green color (var(--glow-color)) for text */
